@@ -60,11 +60,14 @@ cd AI-Solution-Specialist-Home-Assessment-Reneta-PLC
 
 ### Step 3 — Start it
 
-```bash
-python run.py
-```
+| 💻 Your system | Command |
+| :--- | :--- |
+| 🍎 **macOS** / 🐧 **Linux** | `python3 run.py` |
+| 🪟 **Windows** | `python run.py` |
 
-> On macOS and Linux, use `python3 run.py` if `python` is not on your PATH.
+> [!WARNING]
+> macOS and most Linux systems have **no `python` command, only `python3`**. If you see
+> `command not found: python`, that is all this is — run `python3 run.py` instead.
 
 **That is the whole setup.** There is no separate install step, because `run.py` does it for you.
 On the first run it:
@@ -108,7 +111,7 @@ Set `SKIP_BOOTSTRAP=1` and `run.py` will not touch your environment:
 python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-SKIP_BOOTSTRAP=1 python run.py
+SKIP_BOOTSTRAP=1 python run.py     # `python` works here, the venv provides it
 ```
 
 </details>
@@ -236,6 +239,19 @@ even though the fact is in the document. Synonyms are handled by a small table i
 **With more time** I would replace the matcher with **sentence embeddings** over the same sections,
 and keep the three checks unchanged. They are what make the answers trustworthy, and they do not
 depend on how the passages are found.
+
+---
+
+## 🛠️ If something goes wrong
+
+| What you see | What it means | Fix |
+| :--- | :--- | :--- |
+| `command not found: python` | macOS and Linux only ship `python3` | Run `python3 run.py` |
+| `No module named venv` | Debian and Ubuntu split this into its own package | `sudo apt install python3-venv` |
+| `Address already in use` | Port 5050 is taken | `PORT=5051 python3 run.py` |
+| `pytest: command not found` | The environment is not activated in your shell | Use `.venv/bin/pytest` |
+
+Deleting the `.venv` folder is safe at any time. The next run rebuilds it.
 
 ---
 
