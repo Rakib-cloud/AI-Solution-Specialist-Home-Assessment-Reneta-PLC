@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}Policies · Leave Policy Assistant{% endblock %}
+{% block crumb %}Policies{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/policies.js') }}"></script>
+{% endblock %}
+{% block body %}
+<main class="page">
+  <header class="page-head">
+    <div>
+      <p class="eyebrow">Policy library</p>
+      <h1>Policies</h1>
+      <p class="meta">Upload, write, publish, and hand a policy to the assistant.</p>
+    </div>
+    <button id="create-policy" class="button" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Create policy
+    </button>
+  </header>
+
+  <dl class="stat-row" id="stat-row">
+    <div class="stat"><dt>All policies</dt><dd id="stat-total">0</dd></div>
+    <div class="stat"><dt>Published</dt><dd id="stat-published">0</dd></div>
+    <div class="stat"><dt>Drafts</dt><dd id="stat-draft">0</dd></div>
+  </dl>
+
+  <!-- The wizard card lives here and is moved into the modal when it opens. -->
+  <div id="wizard-host" hidden>
+    <div class="modal is-wide" id="wizard-card" role="dialog" aria-modal="true" aria-labelledby="wizard-title">
+      <header class="wizard-head">
+        <div>
+          <h2 id="wizard-title">New policy</h2>
+          <p class="meta" id="wizard-sub">Pick a starting point.</p>
+        </div>
+        <button id="wizard-close" class="icon-button" type="button" aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </header>
+
+      <ol class="wizard-steps" id="wizard-progress">
+        <li data-step="start">Start</li>
+        <li data-step="details">Details</li>
+        <li data-step="leave">Leave types</li>
+      </ol>
+
+      <div class="wizard-body">
+        <!-- Step 1 -->
+        <fieldset class="wizard-step" data-step="start">
+          <legend class="sr-only">How do you want to start?</legend>
+          <label class="start-card">
+            <input type="radio" name="start-kind" value="sample" checked>
+            <span class="start-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3.5h5.5L18 8v11.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 19.5V5A1.5 1.5 0 0 1 7.5 3.5"/><path d="M13 3.8V8.5h4.6"/><path d="M9 13h6"/><path d="M9 16.5h4"/></svg></span>
+            <span class="start-text">
+              <strong>Leave policy template <em class="tag">Recommended</em></strong>
+              <span>Sample policy structure: 11 sections, the entitlements table, and the roles table. You fill in the details.</span>
+            </span>
+          </label>
+          <label class="start-card">
+            <input type="radio" name="start-kind" value="upload">
+            <span class="start-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5"/><path d="M8 9l4-4 4 4"/><path d="M5 19h14"/></svg></span>
+            <span class="start-text">
+              <strong>Upload a PDF</strong>
+              <span>Read an existing policy PDF and turn it into sections you can edit.</span>
+            </span>
+          </label>
+          <label class="start-card">
+            <input type="radio" name="start-kind" value="blank">
+            <span class="start-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
+            <span class="start-text">
+              <strong>Blank policy</strong>
+              <span>Create manually, one section at a time.</span>
+            </span>
+          </label>
+        </fieldset>
+
+        <!-- Step 2a -->
+        <div class="wizard-step" data-step="details" hidden>
+          <label class="field">
+            <span>Policy title</span>
+            <input id="w-title" type="text" placeholder="Acme Company Leave Policy" maxlength="160">
+          </label>
+          <div class="grid-2">
+            <label class="field"><span>Policy number</span><input id="w-number" type="text" placeholder="HR-POL-004" maxlength="160"></label>
+            <label class="field"><span>Version</span><input id="w-version" type="text" placeholder="1.0" maxlength="160"></label>
+            <label class="field"><span>Effective date</span><input id="w-effective" type="text" placeholder="1 January 2026" maxlength="160"></label>
+            <label class="field"><span>Policy owner</span><input id="w-owner" type="text" placeholder="Human Resources Department" maxlength="160"></label>
+          </div>
+          <label class="field">
+            <span>Applies to</span>
+            <input id="w-applies" type="text" placeholder="All permanent full-time employees" maxlength="160">
+          </label>
+          <p class="meta">These go in the header of the policy PDF. You can change them later.</p>
+        </div>
+
+        <!-- Step 2b -->
+        <div class="wizard-step" data-step="upload" hidden>
+          <label id="dropzone" class="dropzone" for="policy-file">
+            <input id="policy-file" name="file" type="file" accept="application/pdf,.pdf">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5"/><path d="M8 9l4-4 4 4"/><path d="M5 19h14"/></svg>
+            <span class="drop-title">Drop a PDF here, or browse</span>
+            <span class="drop-meta">Text-based PDF, up to 8 MB. It is added to the list as published.</span>
+          </label>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="wizard-step" data-step="leave" hidden>
+          <p class="meta">This becomes the entitlements table the assistant quotes. Remove the leave types you do not offer.</p>
+          <div class="leave-row leave-head" aria-hidden="true">
+            <span>Leave type</span><span>Entitlement</span><span>Paid</span><span></span>
+          </div>
+          <div class="leave-grid" id="w-leave-rows"></div>
+          <button id="w-add-leave" class="small-button" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Add leave type
+          </button>
+        </div>
+
+        <p id="library-error" class="form-error" hidden></p>
+      </div>
+
+      <footer class="wizard-foot">
+        <button id="wizard-back" class="button secondary" type="button" hidden>Back</button>
+        <span class="wizard-gap"></span>
+        <button id="wizard-next" class="button" type="button">Continue</button>
+      </footer>
+    </div>
+  </div>
+
+  <section class="table-card" aria-label="All policies">
+    <div class="table-toolbar">
+      <label class="search-field">
+        <span class="sr-only">Search policies</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13z"/><path d="M15.4 15.4L20 20"/></svg>
+        <input id="policy-search" type="search" placeholder="Search by title or policy number" autocomplete="off">
+      </label>
+      <label class="sr-only" for="status-filter">Filter by status</label>
+      <select id="status-filter">
+        <option value="all">All statuses</option>
+        <option value="published">Published</option>
+        <option value="draft">Draft</option>
+      </select>
+      <p class="table-count" id="table-count">Loading…</p>
+    </div>
+    <div class="table-scroll">
+      <table class="data">
+        <thead>
+          <tr>
+            <th scope="col">Policy</th>
+            <th scope="col">Policy number</th>
+            <th scope="col">Version</th>
+            <th scope="col">Status</th>
+            <th scope="col">Last updated</th>
+            <th scope="col" class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="policy-rows"></tbody>
+      </table>
+    </div>
+    <div id="policy-empty" class="table-empty" hidden></div>
+  </section>
+</main>
+{% endblock %}

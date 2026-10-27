@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · Leave Policy Assistant{% endblock %}
+{% block crumb %}Preview{% endblock %}
+{% block body_class %}is-fixed{% endblock %}
+{% block scripts %}{% endblock %}
+{% block body %}
+<main class="viewer">
+  <header class="viewer-bar">
+    <a class="small-button" href="{{ url_for('main.policies') }}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6.5L9 12l5.5 5.5"/></svg>
+      Back to list
+    </a>
+    <h1>{{ title }}</h1>
+    <a class="button" href="{{ url_for('main.download_authored', policy_id=policy_id) }}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v10"/><path d="M8 10l4 4 4-4"/><path d="M5 20h14"/></svg>
+      Download PDF
+    </a>
+  </header>
+  <iframe class="viewer-frame" title="{{ title }}" src="{{ url_for('main.preview_authored', policy_id=policy_id) }}"></iframe>
+</main>
+{% endblock %}
