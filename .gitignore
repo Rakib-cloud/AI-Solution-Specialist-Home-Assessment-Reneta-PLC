@@ -7,3 +7,6 @@ __pycache__/
 .DS_Store
 storage/*
 !storage/.gitkeep
+
+# the assessment brief is not part of the solution
+AI Solutions Specialist - Take-Home Assessment.pdf
